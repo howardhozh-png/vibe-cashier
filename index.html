@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Cashier Demo - Vibe Coffee</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
     <style>
-        /* --- General Styling (Starbucks-Inspired Premium Look) --- */
+        /* --- General Styling --- */
         :root {
-            --primary-color: #00704A; /* Starbucks Green */
-            --secondary-color: #d1e7c9; /* Light Green Accent */
-            --bg-color: #f7f7f7; /* Very Light Grey */
+            --primary-color: #38a169; /* Green for Vibe/Coffee */
+            --secondary-color: #f6e05e; /* Yellow for highlights */
+            --bg-color: #f7fafc;
             --card-bg: #ffffff;
-            --text-color: #1c1c1c;
-            --light-text-color: #6a6a6a;
-            --border-color: #e0e0e0;
-            --font-family: 'Helvetica Neue', Arial, sans-serif;
-            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.08);
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -31,124 +27,104 @@
         header {
             background-color: var(--primary-color);
             color: white;
-            padding: 1.5rem 2rem;
-            text-align: center;
-            box-shadow: var(--shadow-subtle);
-        }
-
-        h1 {
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: 1px;
-        }
-
-        .tabs {
-            display: flex;
-            justify-content: center;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .tab-button {
-            background-color: transparent;
-            color: var(--light-text-color);
-            border: none;
             padding: 1rem 2rem;
-            cursor: pointer;
-            transition: color 0.2s, border-bottom 0.2s;
-            font-weight: 600;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab-button.active {
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--primary-color);
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1200px;
             margin: 2rem auto;
-            padding: 0 1.5rem;
+            padding: 0 1rem;
             display: flex;
             gap: 2rem;
         }
 
         .view-section {
             background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
             flex-grow: 1;
         }
 
         h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
             margin-top: 0;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        /* --- Tab Navigation --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .tab-button {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         /* --- 1. Customer View --- */
         #customer-view {
-            width: 40%;
+            width: 35%;
+            min-height: 70vh;
             display: flex;
             flex-direction: column;
-            min-height: 80vh;
         }
 
         #chat-interface {
             flex-grow: 1;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 4px;
             padding: 1rem;
             margin-bottom: 1rem;
             overflow-y: auto;
-            max-height: 60vh;
-            background-color: #fafafa;
+            max-height: 50vh;
+            background-color: #fefefe;
         }
 
         .message {
-            margin-bottom: 15px;
-            max-width: 85%;
-            padding: 12px 18px;
-            border-radius: 20px;
-            line-height: 1.5;
-            font-size: 0.95rem;
+            margin-bottom: 10px;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            line-height: 1.4;
         }
 
         .user-message {
             background-color: var(--primary-color);
             color: white;
             margin-left: auto;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 0;
         }
-        
+
         .ai-message {
-            background-color: var(--secondary-color);
+            background-color: var(--border-color);
             color: var(--text-color);
             margin-right: auto;
-            border-bottom-left-radius: 5px;
-        }
-        
-        .notification-message {
-            background-color: #fce8a6; /* Gold/Yellow for readiness */
-            color: #7b4f00; 
-            font-weight: 700;
-            text-align: center;
+            border-bottom-left-radius: 0;
         }
 
         .receipt {
-            border: 2px dashed var(--primary-color);
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #f5fff7; /* Very light green */
-            border-radius: 8px;
-            text-align: center;
+            border: 1px dashed var(--primary-color);
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #ecfdf5;
             font-size: 0.9rem;
         }
 
@@ -160,25 +136,24 @@
 
         #text-input {
             flex-grow: 1;
-            padding: 1rem;
+            padding: 0.75rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 4px;
         }
 
         #send-btn, #voice-toggle {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 1rem;
-            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
         }
         
-        #voice-toggle:hover { background-color: #00563f; }
-        
+        #voice-toggle.voice-active {
+            background-color: #ef4444; /* Red for recording */
+        }
+
         /* --- 2. Barista View --- */
         #barista-view {
             width: 30%;
@@ -186,102 +161,85 @@
 
         .order-ticket {
             border: 1px solid var(--border-color);
-            padding: 1.2rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background-color: #f7fbfd;
         }
-        
-        .order-ticket:hover { transform: translateY(-2px); }
 
         .ticket-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.8rem;
-            font-weight: 700;
-            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
         }
 
         .status-tag {
-            padding: 5px 10px;
-            border-radius: 50px; /* Pill shape */
-            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
             color: white;
-            font-weight: 600;
         }
 
-        .status-pending { background-color: #00704A; }
-        .status-in-progress { background-color: #ffc200; }
-        .status-completed { background-color: #5cb85c; }
+        .status-pending { background-color: #3182ce; }
+        .status-in-progress { background-color: #f6ad55; }
+        .status-completed { background-color: var(--primary-color); }
 
         .ticket-details {
             list-style: none;
             padding: 0;
             margin: 0.5rem 0;
-            color: var(--text-color);
         }
 
         .ticket-details li {
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            line-height: 1.3;
+            margin-bottom: 3px;
+            font-size: 0.95rem;
         }
 
         .ticket-actions button {
             background-color: var(--secondary-color);
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-            padding: 0.6rem 1.2rem;
-            border-radius: 5px;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
             margin-right: 0.5rem;
-            font-weight: 700;
-            transition: background-color 0.2s;
+            font-weight: bold;
         }
-        
-        .ticket-actions button:hover { background-color: #c0d8b5; }
 
         /* --- 3. Owner View --- */
         #owner-view {
-            width: 30%;
+            width: 35%;
         }
 
         .metric-card {
-            padding: 1.8rem;
-            margin-bottom: 1.5rem;
-            border-radius: 10px;
-            background-color: #fff;
-            box-shadow: var(--shadow-subtle);
-            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background-color: #f0fff4; /* Light green background */
+            border-left: 5px solid var(--primary-color);
         }
 
         .metric-card h3 {
             margin-top: 0;
-            color: var(--light-text-color);
-            font-size: 1rem;
-            font-weight: 500;
+            color: var(--primary-color);
+            font-size: 1.1rem;
         }
 
         .metric-value {
-            font-size: 2.2rem;
-            font-weight: 800;
+            font-size: 2rem;
+            font-weight: bold;
             color: var(--text-color);
         }
 
         #top-selling-list {
-            list-style: none;
-            padding-left: 0;
+            list-style: decimal;
+            padding-left: 1.5rem;
         }
 
         #top-selling-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.95rem;
+            padding: 5px 0;
+            border-bottom: 1px dotted var(--border-color);
         }
 
         /* --- Utility Class --- */
@@ -293,35 +251,33 @@
 <body>
 
     <header>
-        <h1>☕ VIBE AI CASHIER</h1>
-        <p style="margin: 0; font-weight: 300;">NYC Coffee Ordering Platform</p>
+        <h1>☕ Vibe AI Cashier</h1>
+        <p>A Mini-Product Demo</p>
     </header>
 
     <div class="tabs">
-        <button class="tab-button active" data-view="customer">Customer View (Kiosk)</button>
-        <button class="tab-button" data-view="barista">Barista View (Tickets)</button>
-        <button class="tab-button" data-view="owner">Owner View (Dashboard)</button>
+        <button class="tab-button active" data-view="customer">Customer View</button>
+        <button class="tab-button" data-view="barista">Barista View</button>
+        <button class="tab-button" data-view="owner">Owner View</button>
     </div>
 
     <div class="container">
         <section id="customer-view" class="view-section">
-            <h2>Customer View: Place Your Order</h2>
-            <p style="color: var(--light-text-color); margin-top: -10px;">The AI will guide you through your drink customization.</p>
+            <h2>Customer View: Order Now</h2>
+            <p><strong>Note:</strong> Voice/Chat logic is simulated for Netlify deployment.</p>
 
             <div id="chat-interface">
                 <div class="message ai-message">
-                    Hi there! Welcome to NYC Coffee. What can I get started for you today?
+                    Hi there! Welcome to Vibe Coffee. What can I get started for you today?
                 </div>
             </div>
 
             <div class="input-controls">
-                <input type="text" id="text-input" placeholder="Start your order (e.g., 'I want a large iced latte')" disabled>
-                <button id="send-btn" disabled>Send</button>
-                <button id="voice-toggle">🎤 Start New Order</button>
+                <input type="text" id="text-input" placeholder="Type your order (e.g., 'I want a large hot latte with oat milk')">
+                <button id="send-btn">Send</button>
+                <button id="voice-toggle">🎤 Voice Mode (Simulated)</button>
             </div>
-            <p id="voice-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--light-text-color);" class="hidden">
-                Chat mode activated. Please type your order details.
-            </p>
+            <p id="voice-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: #ef4444;" class="hidden"></p>
 
         </section>
 
@@ -336,19 +292,19 @@
             <h2>Owner View: Daily Data Dashboard</h2>
             <div id="dashboard-metrics">
                 <div class="metric-card">
-                    <h3>TOTAL ORDERS TODAY</h3>
+                    <h3>Total Orders Today</h3>
                     <div id="metric-total-orders" class="metric-value">0</div>
                 </div>
                 <div class="metric-card">
-                    <h3>AVERAGE ORDER VALUE (AOV)</h3>
+                    <h3>Average Order Value (AOV)</h3>
                     <div id="metric-aov" class="metric-value">$0.00</div>
                 </div>
                 <div class="metric-card">
-                    <h3>TOTAL REVENUE</h3>
+                    <h3>Total Revenue</h3>
                     <div id="metric-revenue" class="metric-value">$0.00</div>
                 </div>
                 <div class="metric-card">
-                    <h3>TOP SELLING ITEM</h3>
+                    <h3>Top Selling Item</h3>
                     <div id="metric-top-item" class="metric-value">N/A</div>
                 </div>
             </div>
@@ -360,147 +316,32 @@
     </div>
 
     <script>
-        // --- ⚙️ CONFIGURATION: GOOGLE SHEET API URL ---
-        const GOOGLE_SHEET_API_URL = 'https://script.google.com/a/macros/wondersco.com/s/AKfycbzXvx_TuYLaqgYpF3_lnP1C7Nh6YY7YbU-4KIzV0CzEMVqbq3tVrUydwgVEagfwd0K/exec';
-        // ----------------------------------------------------
-
-        // --- ☕ Data & Menu (Matches NYC Coffee Menu) ---
+        // --- ☕ Data & Menu (Simulated Database) ---
         let orders = JSON.parse(localStorage.getItem('vibeCoffeeOrders')) || [];
         let orderIdCounter = localStorage.getItem('vibeOrderIdCounter') || 1001;
-        
-        // State for Multi-turn Conversation - RESTORED
-        let currentOrder = null;
-        let conversationState = 'initial'; // 'initial', 'ordering', 'clarifying'
-        let currentClarifyingMod = null; // Stores the modifier key (e.g., 'size', 'temp')
-        let currentItemDetails = null; // Stores the item being clarified
 
         const MENU = {
-            'americano': { 
-                category: 'Espresso', 
-                prices: { 'small': 3.00, 'large': 4.00 }, 
-                options: ['size', 'temp', 'shots'] 
-            },
-            'latte': { 
-                category: 'Espresso', 
-                prices: { 'small': 4.00, 'large': 5.00 }, 
-                options: ['size', 'temp', 'milk', 'shots', 'syrup'] 
-            },
-            'cold brew': { 
-                category: 'Cold', 
-                prices: { 'small': 4.00, 'large': 5.00 }, 
-                options: ['size', 'ice', 'milk', 'sweetness'] 
-            },
-            'mocha': { 
-                category: 'Espresso', 
-                prices: { 'small': 4.50, 'large': 5.50 }, 
-                options: ['size', 'temp', 'milk', 'shots', 'syrup'] 
-            },
-            'coffee frappuccino': { 
-                category: 'Blended', 
-                prices: { 'small': 5.50, 'large': 6.00 }, 
-                options: ['size', 'milk', 'sweetness'] 
-            },
-            'black tea': { 
-                category: 'Tea', 
-                prices: { 'small': 3.00, 'large': 3.75 }, 
-                options: ['size', 'temp', 'sweetness'] 
-            },
-            'jasmine tea': { 
-                category: 'Tea', 
-                prices: { 'small': 3.50, 'large': 4.25 }, 
-                options: ['size', 'temp', 'sweetness'] 
-            },
-            'lemon green tea': { 
-                category: 'Tea', 
-                prices: { 'small': 3.50, 'large': 4.25 }, 
-                options: ['size', 'temp', 'sweetness'] 
-            },
-            'matcha latte': { 
-                category: 'Tea', 
-                prices: { 'small': 4.50, 'large': 5.25 }, 
-                options: ['size', 'temp', 'milk', 'matcha'] 
-            }
+            'latte': { basePrice: 4.50, category: 'Espresso', options: ['size', 'temp', 'milk', 'shots'] },
+            'cappuccino': { basePrice: 4.50, category: 'Espresso', options: ['size', 'temp', 'milk', 'shots'] },
+            'americano': { basePrice: 3.00, category: 'Espresso', options: ['size', 'temp', 'shots'] },
+            'frappuccino': { basePrice: 6.00, category: 'Blended', options: ['size', 'milk', 'sweetness'] },
+            'cold brew': { basePrice: 4.00, category: 'Cold', options: ['size', 'ice'] },
         };
 
         const MODIFIERS = {
-            'size': { default: 'small', options: ['small', 'large'], keywords: ['small', 'large', '12oz', '16oz'] },
-            'temp': { default: 'hot', options: ['hot', 'iced'], keywords: ['hot', 'iced', 'cold'] },
-            'milk': { 
-                default: 'whole milk', 
-                prices: { 'whole milk': 0.00, 'skim milk': 0.00, 'oat milk': 0.50, 'almond milk': 0.75 },
-                keywords: ['whole milk', 'skim milk', 'oat milk', 'almond milk', 'oat', 'almond', 'skim']
-            },
-            'ice': { 
-                default: 'regular', 
-                options: ['no ice', 'less ice', 'regular'],
-                keywords: ['no ice', 'less ice', 'regular ice']
-            },
-            'shots': { default: 1, prices: { 'extra espresso shot': 1.50 }, keywords: ['extra shot', '2 shots', 'two shots', 'add shot'] }, 
-            'matcha': { default: 0, prices: { 'extra matcha shot': 1.50 }, keywords: ['extra matcha', 'add matcha', '2 matcha'] }, 
-            'sweetness': { 
-                default: 'regular', 
-                options: ['no sugar', 'less sugar', 'extra sugar', 'regular'], 
-                keywords: ['no sugar', 'less sugar', 'extra sugar', 'unsweetened']
-            },
-            'syrup': { 
-                default: 'none', 
-                prices: { 'caramel syrup': 0.50, 'hazelnut syrup': 0.50 },
-                keywords: ['caramel', 'hazelnut']
-            },
+            'size': { default: 'medium', prices: { 'small': 0.00, 'medium': 0.00, 'large': 0.50 } },
+            'temp': { default: 'hot', options: ['hot', 'iced'] },
+            'milk': { default: 'whole milk', prices: { 'whole milk': 0.00, 'oat milk': 0.75, 'almond milk': 0.75, 'skim milk': 0.00 } },
+            'ice': { default: 'regular', options: ['regular', 'less ice', 'extra ice', 'no ice'] },
+            'shots': { default: 1, prices: { 'extra shot': 1.00 } },
+            'sweetness': { default: 'regular', options: ['regular', 'less sweet', 'extra sweet', 'unsweetened'] }
         };
 
-        // Map for asking clarification questions
-        const ClarificationMap = {
-            'size': {
-                question: "What size would you like? We have Small (12oz) and Large (16oz).",
-                regex: /(small|12oz|large|16oz)/i,
-                parse: (msg) => msg.includes('large') || msg.includes('16oz') ? 'large' : 'small'
-            },
-            'temp': {
-                question: "Would you like that Hot or Iced?",
-                regex: /(hot|iced|cold)/i,
-                parse: (msg) => msg.includes('iced') || msg.includes('cold') ? 'iced' : 'hot'
-            },
-            'milk': {
-                question: "What kind of milk? We have Whole, Skim, Oat (+\\$0.50), or Almond (+\\$0.75).",
-                regex: /(whole milk|skim milk|oat milk|almond milk|oat|almond|skim|whole)/i,
-                parse: (msg) => {
-                    if (msg.includes('oat')) return 'oat milk';
-                    if (msg.includes('almond')) return 'almond milk';
-                    if (msg.includes('skim')) return 'skim milk';
-                    return 'whole milk';
-                }
-            },
-            'sweetness': {
-                question: "And for sweetness? Regular, Less Sugar, Extra Sugar, or No Sugar?",
-                regex: /(no sugar|less sugar|extra sugar|regular|unsweetened)/i,
-                parse: (msg) => {
-                    if (msg.includes('no sugar') || msg.includes('unsweetened')) return 'no sugar';
-                    if (msg.includes('less sugar')) return 'less sugar';
-                    if (msg.includes('extra sugar')) return 'extra sugar';
-                    return 'regular';
-                }
-            },
-            'ice': {
-                question: "What level of ice? Regular, Less Ice, or No Ice?",
-                regex: /(no ice|less ice|regular ice|regular)/i,
-                parse: (msg) => {
-                    if (msg.includes('no ice')) return 'no ice';
-                    if (msg.includes('less ice')) return 'less ice';
-                    return 'regular';
-                }
-            },
-            'syrup': {
-                question: "Would you like to add Caramel or Hazelnut syrup? (+\\$0.50)",
-                regex: /(caramel|hazelnut|no|none)/i,
-                parse: (msg) => {
-                    if (msg.includes('caramel')) return 'caramel syrup';
-                    if (msg.includes('hazelnut')) return 'hazelnut syrup';
-                    return 'none';
-                }
-            }
-        };
+        // --- 🤖 AI Conversation Logic (Simulated) ---
+        let currentOrder = null;
+        let conversationState = 'initial';
 
+        // Helper: Generates a unique, readable order ID
         function generateOrderId() {
             const id = `VIBE-${orderIdCounter}`;
             orderIdCounter++;
@@ -508,139 +349,39 @@
             return id;
         }
 
-        function calculatePrice(itemKey, mods) {
-            const sizeKey = mods.size;
-            let price = MENU[itemKey].prices[sizeKey] || 0.00; 
+        // Helper: Calculates order price
+        function calculatePrice(item, mods) {
+            let price = MENU[item].basePrice;
             
-            if (mods.milk && mods.milk !== MODIFIERS.milk.default) {
+            // Size modifier
+            price += MODIFIERS.size.prices[mods.size] || 0;
+
+            // Milk modifier
+            if (mods.milk) {
                  price += MODIFIERS.milk.prices[mods.milk] || 0;
             }
 
-            if (mods.shots > 1) { 
-                price += MODIFIERS.shots.prices['extra espresso shot'];
-            }
-
-            if (mods.matcha > 0) {
-                 price += MODIFIERS.matcha.prices['extra matcha shot'] * mods.matcha;
-            }
-
-            if (mods.syrup && mods.syrup !== MODIFIERS.syrup.default) {
-                price += MODIFIERS.syrup.prices[mods.syrup] || 0;
+            // Shot modifier (simulated - assumes default is 1)
+            if (mods.shots > 1) {
+                price += MODIFIERS.shots.prices['extra shot'] * (mods.shots - 1);
             }
 
             return price.toFixed(2);
         }
 
-        function checkImpossibleRequests(item) {
-            if (item.name.includes('frappuccino') && item.mods.temp === 'hot') {
-                return "Frappuccinos are blended drinks, so they can only be served cold/iced.";
-            }
-
-            if (item.name === 'cold brew' && item.mods.temp === 'hot') {
-                 return "Cold Brew is brewed cold and can only be served iced.";
-            }
-
-            if (item.name === 'latte' && item.mods.shots < 1) {
-                return "A Latte must have espresso. Did you mean to order a Milk/Steamer?";
-            }
-            
-            if (item.mods.shots > 5) {
-                item.mods.shots = 5; 
-                return "For safety, we cap espresso at 5 shots per drink. I've added 5 for you.";
-            }
-            
-            const baseMilk = MODIFIERS.milk.default;
-            if (item.name.includes('tea') && !item.name.includes('latte') && item.mods.milk !== baseMilk) {
-                 return "Only Matcha Latte supports milk substitutions. Your other teas will be made with water/tea base.";
-            }
-
-            return null;
-        }
-        
-        function checkAndClarifyMissingMods(itemDetails) {
-            const requiredOptions = MENU[itemDetails.name].options;
-
-            for (const modKey of requiredOptions) {
-                if (itemDetails.mods[modKey] && itemDetails.mods[modKey] !== MODIFIERS[modKey].default) {
-                    continue; 
-                }
-
-                if ((itemDetails.name.includes('cold brew') || itemDetails.name.includes('frappuccino')) && modKey === 'temp') {
-                    itemDetails.mods.temp = 'iced';
-                    continue;
-                }
-                
-                if (itemDetails.name.includes('tea') && !itemDetails.name.includes('latte') && modKey === 'milk') {
-                    itemDetails.mods.milk = 'whole milk';
-                    continue;
-                }
-
-                if (modKey !== 'shots' && modKey !== 'matcha') {
-                    conversationState = 'clarifying';
-                    currentClarifyingMod = modKey;
-                    currentItemDetails = itemDetails;
-                    return ClarificationMap[modKey].question;
-                }
-            }
-
-            conversationState = 'ordering';
-            currentClarifyingMod = null;
-            currentItemDetails = null;
-            
-            return null;
-        }
-
-        // --- Core Conversational Processing Function ---
+        // Core AI processing function
         function processUserMessage(message) {
             const lowerMsg = message.toLowerCase();
             const response = { type: 'chat', text: '' };
 
-            // --- A. Handle Clarification Response State ---
-            if (conversationState === 'clarifying' && currentClarifyingMod && currentItemDetails) {
-                const clarification = ClarificationMap[currentClarifyingMod];
-                
-                if (clarification.regex.test(lowerMsg)) {
-                    currentItemDetails.mods[currentClarifyingMod] = clarification.parse(lowerMsg);
-                    
-                    const nextQuestion = checkAndClarifyMissingMods(currentItemDetails);
-
-                    if (nextQuestion) {
-                        response.text = `Thank you. Now, ${nextQuestion}`;
-                        return response;
-                    } 
-                    
-                    // If no more clarification is needed, finalize the item.
-                    const error = checkImpossibleRequests(currentItemDetails);
-                    if (error) {
-                        conversationState = 'ordering';
-                        return { type: 'chat', text: `I'm sorry, due to that choice: **${error}** Let's try the drink again.` };
-                    }
-
-                    // Item is complete, add it to the order
-                    if (!currentOrder) {
-                        currentOrder = { id: generateOrderId(), status: 'Pending', items: [] };
-                    }
-                    currentItemDetails.price = calculatePrice(currentItemDetails.name, currentItemDetails.mods);
-                    currentOrder.items.push(currentItemDetails);
-
-                    response.text = `Okay, a **${currentItemDetails.mods.size} ${currentItemDetails.mods.temp} ${currentItemDetails.name}** has been added. Anything else, or are you ready to checkout?`;
-                    return response;
-
-                } else {
-                    response.text = `I didn't quite catch that. Could you please answer specifically about the **${currentClarifyingMod}**? ${clarification.question}`;
-                    return response;
-                }
-            }
-
-            // --- B. Handle Order Completion/Cancellation ---
+            // 1. Check for Order Completion/Cancellation
             if (lowerMsg.includes('that is all') || lowerMsg.includes('i am done') || lowerMsg.includes('checkout')) {
                 if (currentOrder && currentOrder.items.length > 0) {
                     response.type = 'receipt';
-                    response.text = 'Perfect! Here is your receipt. Scan the QR code below to save it.';
+                    response.text = 'Perfect! Here is your receipt. Your order is being sent to the baristas now. Thank you!';
                     placeOrder(currentOrder);
-                    
-                    // Reset conversation state and UI logic is handled after receipt render completes
-
+                    currentOrder = null;
+                    conversationState = 'initial';
                     return response;
                 } else {
                     response.text = "You haven't added anything to your order yet. What drink would you like to start with?";
@@ -649,53 +390,77 @@
                 }
             }
 
-            // --- C. Handle New Item Request ---
+            // 2. Check for Menu Item & Start/Continue Order
             let foundItem = Object.keys(MENU).find(item => lowerMsg.includes(item));
             
             if (foundItem) {
+                // Initial request or adding another item
                 if (!currentOrder) {
                     currentOrder = { id: generateOrderId(), status: 'Pending', items: [] };
                 }
 
+                // Parse base options (simplified: size, temp, milk)
                 const itemDetails = { 
                     name: foundItem, 
-                    price: 0, 
+                    price: MENU[foundItem].basePrice,
                     mods: { 
-                        size: lowerMsg.includes('large') || lowerMsg.includes('16oz') ? 'large' : MODIFIERS.size.default, 
-                        temp: lowerMsg.includes('iced') || lowerMsg.includes('cold') ? 'iced' : MODIFIERS.temp.default,
-                        milk: lowerMsg.includes('oat milk') ? 'oat milk' : lowerMsg.includes('almond milk') ? 'almond milk' : lowerMsg.includes('skim milk') ? 'skim milk' : MODIFIERS.milk.default,
-                        shots: lowerMsg.includes('extra shot') || lowerMsg.includes('2 shots') ? 2 : MODIFIERS.shots.default, 
-                        matcha: lowerMsg.includes('extra matcha') ? 1 : MODIFIERS.matcha.default, 
-                        ice: lowerMsg.includes('no ice') ? 'no ice' : lowerMsg.includes('less ice') ? 'less ice' : MODIFIERS.ice.default,
-                        sweetness: lowerMsg.includes('no sugar') ? 'no sugar' : lowerMsg.includes('extra sugar') ? 'extra sugar' : lowerMsg.includes('less sugar') ? 'less sugar' : MODIFIERS.sweetness.default,
-                        syrup: lowerMsg.includes('caramel') ? 'caramel syrup' : lowerMsg.includes('hazelnut') ? 'hazelnut syrup' : MODIFIERS.syrup.default
+                        size: lowerMsg.includes('small') ? 'small' : lowerMsg.includes('large') ? 'large' : 'medium',
+                        temp: lowerMsg.includes('iced') || lowerMsg.includes('cold') ? 'iced' : (foundItem === 'frappuccino' || foundItem === 'cold brew' ? 'iced' : 'hot'),
+                        milk: lowerMsg.includes('oat milk') ? 'oat milk' : lowerMsg.includes('almond milk') ? 'almond milk' : MODIFIERS.milk.default,
+                        shots: lowerMsg.includes('extra shot') ? 2 : 1,
+                        ice: lowerMsg.includes('less ice') ? 'less ice' : (lowerMsg.includes('no ice') ? 'no ice' : MODIFIERS.ice.default)
                     }
                 };
 
+                // --- 🚨 Common Sense Guardrail Checks ---
                 const error = checkImpossibleRequests(itemDetails);
                 if (error) {
                     response.text = `I can't process that request: **${error}**. Please try again.`;
                     return response;
                 }
 
-                const clarificationQuestion = checkAndClarifyMissingMods(itemDetails);
-
-                if (clarificationQuestion) {
-                    response.text = `Starting your order. ${clarificationQuestion}`;
-                    return response;
-                }
-                
-                itemDetails.price = calculatePrice(foundItem, itemDetails.mods);
+                // Finalize item and price
+                itemDetails.price = calculatePrice(itemDetails.name, itemDetails.mods);
                 currentOrder.items.push(itemDetails);
 
                 response.text = `Got it! A **${itemDetails.mods.size} ${itemDetails.mods.temp} ${itemDetails.name}** has been added. Anything else, or are you ready to checkout?`;
-                return response;
-
-            } else if (conversationState === 'initial' || conversationState === 'ordering') {
-                response.text = "I'm sorry, I didn't catch that. Please tell me the name of the drink you want (e.g., Latte, Cold Brew, Black Tea) or say 'checkout'.";
-            } 
+                conversationState = 'ordering';
+            } else if (conversationState === 'initial') {
+                response.text = "I'm sorry, I didn't catch that. Could you please specify a drink from our menu (Latte, Cappuccino, Frappuccino, Americano, Cold Brew)?";
+            } else if (conversationState === 'ordering') {
+                response.text = "Is that for a new drink, or are you ready to checkout?";
+            } else {
+                response.text = "I'm sorry, I'm just a coffee chatbot. Please tell me your order or type 'checkout' when you're done.";
+            }
 
             return response;
+        }
+
+        // --- ⚠️ Guardrail: Reject Impossible/Unreasonable Requests ---
+        function checkImpossibleRequests(item) {
+            // Frappuccinos cannot be made “hot” 
+            if (item.name === 'frappuccino' && item.mods.temp === 'hot') {
+                return "Frappuccinos are blended drinks, so they can only be served cold/iced.";
+            }
+
+            // 'Latte with no espresso shots' is just plain milk (implied rule - too hard to parse fully, simplified)
+            // A Latte must have at least one shot.
+            if (item.name === 'latte' && item.mods.shots < 1) {
+                return "A Latte requires at least one espresso shot. Did you want a steamer?";
+            }
+            
+            // Sensible maximum shots (e.g., 5)
+            if (item.mods.shots > 5) {
+                 return "That's a lot of shots! For safety, we cap espresso at 5 shots per drink. I've added 5 for you.";
+            }
+            // *Self-Correction for the demo* - set the shots to the sensible max
+            if (item.mods.shots > 5) {
+                item.mods.shots = 5;
+            }
+
+            // Other checks would go here (e.g., Cold Brew temp, max items, etc.)
+
+            return null; // Request is valid
         }
 
         // --- DOM Elements ---
@@ -709,46 +474,22 @@
 
         // --- 1. Customer View Functions ---
 
+        // Renders a new message in the chat interface
         function renderMessage(text, type, data = null) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message');
-            if (type === 'notification') {
-                msgDiv.classList.add('notification-message');
-            } else {
-                msgDiv.classList.add(`${type}-message`);
-            }
+            msgDiv.classList.add(`${type}-message`);
             msgDiv.innerHTML = text;
 
             if (type === 'receipt' && data) {
                 msgDiv.innerHTML += renderReceipt(data);
-                
-                setTimeout(() => {
-                    const qrCodeElement = document.getElementById(`qrcode-${data.id}`);
-                    if (qrCodeElement) {
-                        const receiptLink = `https://vibe.coffee/receipt?id=${data.id}&total=${data.total}`;
-                        new QRCode(qrCodeElement, {
-                            text: receiptLink,
-                            width: 100,
-                            height: 100,
-                            colorDark : "#00704A", // Updated Primary Color
-                            colorLight : "#ffffff",
-                            correctLevel : QRCode.CorrectLevel.H
-                        });
-                    }
-                    // Final UI reset MUST happen AFTER the receipt is rendered
-                    textInput.disabled = true;
-                    sendBtn.disabled = true;
-                    voiceToggle.textContent = '🎤 Start New Order';
-                    textInput.placeholder = "Start your order (e.g., 'I want a large iced latte')";
-                    voiceStatus.classList.add('hidden');
-                    
-                }, 50);
             }
 
             chatInterface.appendChild(msgDiv);
-            chatInterface.scrollTop = chatInterface.scrollHeight;
+            chatInterface.scrollTop = chatInterface.scrollHeight; // Auto-scroll to bottom
         }
 
+        // Generates the HTML for the order receipt
         function renderReceipt(order) {
             let total = 0;
             let receiptHTML = `<div class="receipt">
@@ -758,56 +499,31 @@
             order.items.forEach(item => {
                 const itemTotal = parseFloat(item.price);
                 total += itemTotal;
-                
-                let modsList = [
-                    `Size: ${item.mods.size.toUpperCase()}`,
-                    `Temp: ${item.mods.temp.toUpperCase()}`,
-                    `Milk: ${item.mods.milk.toUpperCase()}`
-                ];
-                
-                if (item.mods.shots > 1) { modsList.push(`Extra Espresso Shot`); }
-                if (item.mods.matcha > 0) { modsList.push(`Extra Matcha Shot`); }
-                if (item.mods.syrup !== MODIFIERS.syrup.default) { modsList.push(`Syrup: ${item.mods.syrup.toUpperCase()}`); }
-                if (item.mods.ice !== MODIFIERS.ice.default) { modsList.push(`Ice: ${item.mods.ice.toUpperCase()}`); }
-                if (item.mods.sweetness !== MODIFIERS.sweetness.default) { modsList.push(`Sugar: ${item.mods.sweetness.toUpperCase()}`); }
-
-
-                receiptHTML += `<p style="margin-bottom: 0;"><strong>${item.name.toUpperCase()}</strong> - $${itemTotal.toFixed(2)}</p>
-                    <ul style="list-style: none; margin: 0; padding: 0 0 5px 10px; font-size: 0.85rem; text-align: left;">
-                        ${modsList.map(mod => `<li>- ${mod}</li>`).join('')}
+                receiptHTML += `<p><strong>${item.name.toUpperCase()}</strong> - $${itemTotal.toFixed(2)}</p>
+                    <ul style="list-style: none; margin: 0; padding: 0 0 5px 10px; font-size: 0.85rem;">
+                        <li>- Size: ${item.mods.size}</li>
+                        <li>- Temp: ${item.mods.temp}</li>
+                        <li>- Milk: ${item.mods.milk}</li>
+                        ${item.mods.shots > 1 ? `<li>- Shots: ${item.mods.shots}</li>` : ''}
+                        ${item.mods.ice !== MODIFIERS.ice.default ? `<li>- Ice: ${item.mods.ice}</li>` : ''}
                     </ul>`;
             });
 
             receiptHTML += `<hr style="border-style: dotted;">
-                <p style="font-weight: bold; font-size: 1.1rem; text-align: right; margin-right: 15px;">TOTAL: $${total.toFixed(2)}</p>
-                
-                <p style="font-size: 0.8rem; margin-top: 15px; margin-bottom: 5px;">Scan to keep your receipt:</p>
-                <div id="qrcode-${order.id}" style="width:100px; height:100px; margin: 0 auto;"></div>
-                
+                <p style="font-weight: bold; font-size: 1.1rem; text-align: right;">TOTAL: $${total.toFixed(2)}</p>
                 <p style="text-align: center; margin-top: 10px;">Thank you! Your order is being prepared.</p>
             </div>`;
             return receiptHTML;
         }
 
+        // Simulates placing the order into the 'database'
         function placeOrder(order) {
             const finalOrder = { 
                 ...order, 
                 timestamp: new Date().toISOString(),
                 total: order.items.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2)
             };
-            
-            fetch(GOOGLE_SHEET_API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(finalOrder)
-            })
-            .then(response => { console.log('Order data sent to Google Sheet API.'); })
-            .catch(error => console.error('Error sending order data:', error));
-
-
-            orders.unshift(finalOrder);
+            orders.unshift(finalOrder); // Add to the front
             saveOrders();
             renderBaristaView();
             renderOwnerView();
@@ -821,9 +537,11 @@
             renderMessage(message, 'user');
             textInput.value = '';
 
+            // Simulate AI delay and response
             setTimeout(() => {
                 const response = processUserMessage(message);
                 if (response.type === 'receipt') {
+                    // Find the order that was just placed (it's the first one now)
                     const placedOrder = orders[0];
                     renderMessage(response.text, 'ai', placedOrder);
                 } else {
@@ -832,59 +550,65 @@
             }, 500);
         });
 
-        // Event listener for Voice Toggle (START CHAT)
+        // Event listener for Voice Toggle (Simulated)
+        let isVoiceActive = false;
         voiceToggle.addEventListener('click', () => {
-            // Check if a conversation is already active
-            if (conversationState === 'initial' || currentOrder === null) {
-                // Start a new order/chat session
-                conversationState = 'ordering';
-                textInput.disabled = false;
-                sendBtn.disabled = false;
-                textInput.placeholder = "Type your order details (e.g., 'large iced latte')";
-                voiceToggle.textContent = '✔️ Checkout / End Order';
-                voiceStatus.classList.remove('hidden');
-                voiceStatus.textContent = 'Chat mode activated. Type "checkout" or press this button again when done.';
-                
-                // Clear and restart the chat flow
-                chatInterface.innerHTML = '';
-                renderMessage('Hello! How can I help you customize your order?', 'ai');
+            isVoiceActive = !isVoiceActive;
+            voiceToggle.classList.toggle('voice-active', isVoiceActive);
+            voiceToggle.textContent = isVoiceActive ? '🔴 Listening... (Simulated)' : '🎤 Voice Mode (Simulated)';
+            voiceStatus.classList.toggle('hidden', !isVoiceActive);
+            voiceStatus.textContent = isVoiceActive 
+                ? 'VOICE MODE: In a real implementation, this would connect to ElevenLabs/Bland AI.' 
+                : '';
+            
+            textInput.disabled = isVoiceActive;
+            sendBtn.disabled = isVoiceActive;
 
-            } else {
-                // If a conversation IS active, treat the button click as "Checkout"
-                const message = 'checkout';
-                renderMessage(message, 'user');
-                
-                setTimeout(() => {
-                    const response = processUserMessage(message);
-                    if (response.type === 'receipt') {
-                        const placedOrder = orders[0];
-                        renderMessage(response.text, 'ai', placedOrder);
-                    } 
-                    // Note: If checkout fails (e.g., empty cart), the chat continues, and the button remains 'Checkout'
-                }, 500);
+            if (isVoiceActive) {
+                // Simulate receiving an order after a few seconds
+                 setTimeout(() => {
+                    if (isVoiceActive) {
+                        const simulatedOrder = 'I want a large iced latte with oat milk, and one small hot cappuccino with whole milk, then checkout.';
+                        renderMessage('Simulated Voice Input: ' + simulatedOrder, 'user');
+                        const response = processUserMessage(simulatedOrder);
+                        
+                        setTimeout(() => {
+                            if (response.type === 'receipt') {
+                                const placedOrder = orders[0];
+                                renderMessage(response.text, 'ai', placedOrder);
+                            } else {
+                                renderMessage(response.text, 'ai');
+                            }
+
+                            // Turn off voice mode after simulated order
+                            isVoiceActive = false;
+                            voiceToggle.classList.remove('voice-active');
+                            voiceToggle.textContent = '🎤 Voice Mode (Simulated)';
+                            voiceStatus.classList.add('hidden');
+                            textInput.disabled = false;
+                            sendBtn.disabled = false;
+                        }, 1000);
+                    }
+                }, 3000);
             }
         });
 
 
         // --- 2. Barista View Functions ---
         
+        // Updates the status of an order
         function updateOrderStatus(id, newStatus) {
             const orderIndex = orders.findIndex(o => o.id === id);
             if (orderIndex !== -1) {
                 orders[orderIndex].status = newStatus;
                 saveOrders();
                 renderBaristaView();
-                
-                if (newStatus === 'Completed') {
-                    let completedIds = JSON.parse(sessionStorage.getItem('completedOrderIds')) || [];
-                    completedIds.push(id);
-                    sessionStorage.setItem('completedOrderIds', JSON.stringify(completedIds));
-                }
             }
         }
 
+        // Renders the Barista Order Queue
         function renderBaristaView() {
-            orderQueue.innerHTML = '';
+            orderQueue.innerHTML = ''; // Clear current view
             const activeOrders = orders.filter(o => o.status !== 'Completed');
 
             if (activeOrders.length === 0) {
@@ -903,16 +627,7 @@
 
                 let detailsHTML = `<ul class="ticket-details">`;
                 order.items.forEach(item => {
-                    let modsSummary = [
-                        item.mods.milk.toUpperCase(),
-                        item.mods.shots > 1 ? 'EXTRA SHOT' : null,
-                        item.mods.matcha > 0 ? 'EXTRA MATCHA' : null,
-                        item.mods.syrup !== MODIFIERS.syrup.default ? item.mods.syrup.toUpperCase() : null,
-                        item.mods.sweetness !== MODIFIERS.sweetness.default ? item.mods.sweetness.toUpperCase() : null,
-                        item.mods.ice !== MODIFIERS.ice.default ? item.mods.ice.toUpperCase() : null,
-                    ].filter(Boolean).join(', ');
-
-                    detailsHTML += `<li>${item.mods.size.toUpperCase()} ${item.mods.temp.toUpperCase()} <strong>${item.name.toUpperCase()}</strong> (${modsSummary})</li>`;
+                    detailsHTML += `<li>${item.mods.size.toUpperCase()} ${item.mods.temp.toUpperCase()} <strong>${item.name.toUpperCase()}</strong> (${item.mods.milk}, ${item.mods.shots} shots)</li>`;
                 });
                 detailsHTML += `</ul>`;
 
@@ -936,21 +651,11 @@
                 orderQueue.appendChild(ticketDiv);
             });
         }
-        
-        function checkCompletedOrdersAndNotify() {
-            let completedIds = JSON.parse(sessionStorage.getItem('completedOrderIds')) || [];
-            
-            if (completedIds.length > 0) {
-                const notificationMessage = `🎉 Your order #${completedIds.join(', #')} is ready for pickup at the counter!`;
-                renderMessage(notificationMessage, 'notification');
-                
-                sessionStorage.removeItem('completedOrderIds');
-            }
-        }
 
 
         // --- 3. Owner View Functions ---
 
+        // Renders the Owner Data Dashboard
         function renderOwnerView() {
             const allItems = orders.flatMap(order => order.items.map(item => ({
                 name: item.name,
@@ -961,6 +666,7 @@
             const totalRevenue = allItems.reduce((sum, item) => sum + item.price, 0);
             const aov = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
             
+            // Item sales count for Top Seller
             const itemCounts = allItems.reduce((counts, item) => {
                 counts[item.name] = (counts[item.name] || 0) + 1;
                 return counts;
@@ -972,6 +678,7 @@
 
             const topItem = sortedItems.length > 0 ? sortedItems[0].name.toUpperCase() : 'N/A';
 
+            // Update DOM
             document.getElementById('metric-total-orders').textContent = totalOrders;
             document.getElementById('metric-aov').textContent = `$${aov.toFixed(2)}`;
             document.getElementById('metric-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
@@ -1003,12 +710,11 @@
             });
             document.querySelector(`.tab-button[data-view="${viewName}"]`).classList.add('active');
 
+            // Refresh views when switching to ensure data is up-to-date
             if (viewName === 'barista') {
                 renderBaristaView();
             } else if (viewName === 'owner') {
                 renderOwnerView();
-            } else if (viewName === 'customer') {
-                checkCompletedOrdersAndNotify();
             }
         }
 
@@ -1020,9 +726,8 @@
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            renderBaristaView();
+            renderBaristaView(); // Initial render of all data
             renderOwnerView();
-            checkCompletedOrdersAndNotify();
         });
         
     </script>
