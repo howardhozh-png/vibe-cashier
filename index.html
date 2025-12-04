@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cashier Demo - Vibe Coffee</title>
+    <style>
+        /* --- General Styling --- */
+        :root {
+            --primary-color: #38a169; /* Green for Vibe/Coffee */
+            --secondary-color: #f6e05e; /* Yellow for highlights */
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .view-section {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        /* --- Tab Navigation --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .tab-button {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* --- 1. Customer View --- */
+        #customer-view {
+            width: 35%;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-interface {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            overflow-y: auto;
+            max-height: 50vh;
+            background-color: #fefefe;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+
+        .ai-message {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .receipt {
+            border: 1px dashed var(--primary-color);
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #ecfdf5;
+            font-size: 0.9rem;
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        #text-input {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        #send-btn, #voice-toggle {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #voice-toggle.voice-active {
+            background-color: #ef4444; /* Red for recording */
+        }
+
+        /* --- 2. Barista View --- */
+        #barista-view {
+            width: 30%;
+        }
+
+        .order-ticket {
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background-color: #f7fbfd;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .status-pending { background-color: #3182ce; }
+        .status-in-progress { background-color: #f6ad55; }
+        .status-completed { background-color: var(--primary-color); }
+
+        .ticket-details {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+
+        .ticket-details li {
+            margin-bottom: 3px;
+            font-size: 0.95rem;
+        }
+
+        .ticket-actions button {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        /* --- 3. Owner View --- */
+        #owner-view {
+            width: 35%;
+        }
+
+        .metric-card {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background-color: #f0fff4; /* Light green background */
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .metric-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        #top-selling-list {
+            list-style: decimal;
+            padding-left: 1.5rem;
+        }
+
+        #top-selling-list li {
+            padding: 5px 0;
+            border-bottom: 1px dotted var(--border-color);
+        }
+
+        /* --- Utility Class --- */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>☕ Vibe AI Cashier</h1>
+        <p>A Mini-Product Demo</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-button active" data-view="customer">Customer View</button>
+        <button class="tab-button" data-view="barista">Barista View</button>
+        <button class="tab-button" data-view="owner">Owner View</button>
+    </div>
+
+    <div class="container">
+        <section id="customer-view" class="view-section">
+            <h2>Customer View: Order Now</h2>
+            <p><strong>Note:</strong> Voice/Chat logic is simulated for Netlify deployment.</p>
+
+            <div id="chat-interface">
+                <div class="message ai-message">
+                    Hi there! Welcome to Vibe Coffee. What can I get started for you today?
+                </div>
+            </div>
+
+            <div class="input-controls">
+                <input type="text" id="text-input" placeholder="Type your order (e.g., 'I want a large hot latte with oat milk')">
+                <button id="send-btn">Send</button>
+                <button id="voice-toggle">🎤 Voice Mode (Simulated)</button>
+            </div>
+            <p id="voice-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: #ef4444;" class="hidden"></p>
+
+        </section>
+
+        <section id="barista-view" class="view-section hidden">
+            <h2>Barista View: Active Orders</h2>
+            <div id="order-queue">
+                <p id="no-orders" style="color: #90a4ae;">No active orders yet. Vibe check: PASSED (for now!)</p>
+            </div>
+        </section>
+
+        <section id="owner-view" class="view-section hidden">
+            <h2>Owner View: Daily Data Dashboard</h2>
+            <div id="dashboard-metrics">
+                <div class="metric-card">
+                    <h3>Total Orders Today</h3>
+                    <div id="metric-total-orders" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Average Order Value (AOV)</h3>
+                    <div id="metric-aov" class="metric-value">$0.00</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Revenue</h3>
+                    <div id="metric-revenue" class="metric-value">$0.00</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Top Selling Item</h3>
+                    <div id="metric-top-item" class="metric-value">N/A</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Top 3 Items Sold</h3>
+            <ol id="top-selling-list">
+                </ol>
+        </section>
+    </div>
+
+    <script>
+        // --- ☕ Data & Menu (Simulated Database) ---
+        let orders = JSON.parse(localStorage.getItem('vibeCoffeeOrders')) || [];
+        let orderIdCounter = localStorage.getItem('vibeOrderIdCounter') || 1001;
+
+        const MENU = {
+            'latte': { basePrice: 4.50, category: 'Espresso', options: ['size', 'temp', 'milk', 'shots'] },
+            'cappuccino': { basePrice: 4.50, category: 'Espresso', options: ['size', 'temp', 'milk', 'shots'] },
+            'americano': { basePrice: 3.00, category: 'Espresso', options: ['size', 'temp', 'shots'] },
+            'frappuccino': { basePrice: 6.00, category: 'Blended', options: ['size', 'milk', 'sweetness'] },
+            'cold brew': { basePrice: 4.00, category: 'Cold', options: ['size', 'ice'] },
+        };
+
+        const MODIFIERS = {
+            'size': { default: 'medium', prices: { 'small': 0.00, 'medium': 0.00, 'large': 0.50 } },
+            'temp': { default: 'hot', options: ['hot', 'iced'] },
+            'milk': { default: 'whole milk', prices: { 'whole milk': 0.00, 'oat milk': 0.75, 'almond milk': 0.75, 'skim milk': 0.00 } },
+            'ice': { default: 'regular', options: ['regular', 'less ice', 'extra ice', 'no ice'] },
+            'shots': { default: 1, prices: { 'extra shot': 1.00 } },
+            'sweetness': { default: 'regular', options: ['regular', 'less sweet', 'extra sweet', 'unsweetened'] }
+        };
+
+        // --- 🤖 AI Conversation Logic (Simulated) ---
+        let currentOrder = null;
+        let conversationState = 'initial';
+
+        // Helper: Generates a unique, readable order ID
+        function generateOrderId() {
+            const id = `VIBE-${orderIdCounter}`;
+            orderIdCounter++;
+            localStorage.setItem('vibeOrderIdCounter', orderIdCounter);
+            return id;
+        }
+
+        // Helper: Calculates order price
+        function calculatePrice(item, mods) {
+            let price = MENU[item].basePrice;
+            
+            // Size modifier
+            price += MODIFIERS.size.prices[mods.size] || 0;
+
+            // Milk modifier
+            if (mods.milk) {
+                 price += MODIFIERS.milk.prices[mods.milk] || 0;
+            }
+
+            // Shot modifier (simulated - assumes default is 1)
+            if (mods.shots > 1) {
+                price += MODIFIERS.shots.prices['extra shot'] * (mods.shots - 1);
+            }
+
+            return price.toFixed(2);
+        }
+
+        // Core AI processing function
+        function processUserMessage(message) {
+            const lowerMsg = message.toLowerCase();
+            const response = { type: 'chat', text: '' };
+
+            // 1. Check for Order Completion/Cancellation
+            if (lowerMsg.includes('that is all') || lowerMsg.includes('i am done') || lowerMsg.includes('checkout')) {
+                if (currentOrder && currentOrder.items.length > 0) {
+                    response.type = 'receipt';
+                    response.text = 'Perfect! Here is your receipt. Your order is being sent to the baristas now. Thank you!';
+                    placeOrder(currentOrder);
+                    currentOrder = null;
+                    conversationState = 'initial';
+                    return response;
+                } else {
+                    response.text = "You haven't added anything to your order yet. What drink would you like to start with?";
+                    conversationState = 'initial';
+                    return response;
+                }
+            }
+
+            // 2. Check for Menu Item & Start/Continue Order
+            let foundItem = Object.keys(MENU).find(item => lowerMsg.includes(item));
+            
+            if (foundItem) {
+                // Initial request or adding another item
+                if (!currentOrder) {
+                    currentOrder = { id: generateOrderId(), status: 'Pending', items: [] };
+                }
+
+                // Parse base options (simplified: size, temp, milk)
+                const itemDetails = { 
+                    name: foundItem, 
+                    price: MENU[foundItem].basePrice,
+                    mods: { 
+                        size: lowerMsg.includes('small') ? 'small' : lowerMsg.includes('large') ? 'large' : 'medium',
+                        temp: lowerMsg.includes('iced') || lowerMsg.includes('cold') ? 'iced' : (foundItem === 'frappuccino' || foundItem === 'cold brew' ? 'iced' : 'hot'),
+                        milk: lowerMsg.includes('oat milk') ? 'oat milk' : lowerMsg.includes('almond milk') ? 'almond milk' : MODIFIERS.milk.default,
+                        shots: lowerMsg.includes('extra shot') ? 2 : 1,
+                        ice: lowerMsg.includes('less ice') ? 'less ice' : (lowerMsg.includes('no ice') ? 'no ice' : MODIFIERS.ice.default)
+                    }
+                };
+
+                // --- 🚨 Common Sense Guardrail Checks ---
+                const error = checkImpossibleRequests(itemDetails);
+                if (error) {
+                    response.text = `I can't process that request: **${error}**. Please try again.`;
+                    return response;
+                }
+
+                // Finalize item and price
+                itemDetails.price = calculatePrice(itemDetails.name, itemDetails.mods);
+                currentOrder.items.push(itemDetails);
+
+                response.text = `Got it! A **${itemDetails.mods.size} ${itemDetails.mods.temp} ${itemDetails.name}** has been added. Anything else, or are you ready to checkout?`;
+                conversationState = 'ordering';
+            } else if (conversationState === 'initial') {
+                response.text = "I'm sorry, I didn't catch that. Could you please specify a drink from our menu (Latte, Cappuccino, Frappuccino, Americano, Cold Brew)?";
+            } else if (conversationState === 'ordering') {
+                response.text = "Is that for a new drink, or are you ready to checkout?";
+            } else {
+                response.text = "I'm sorry, I'm just a coffee chatbot. Please tell me your order or type 'checkout' when you're done.";
+            }
+
+            return response;
+        }
+
+        // --- ⚠️ Guardrail: Reject Impossible/Unreasonable Requests ---
+        function checkImpossibleRequests(item) {
+            // Frappuccinos cannot be made “hot” 
+            if (item.name === 'frappuccino' && item.mods.temp === 'hot') {
+                return "Frappuccinos are blended drinks, so they can only be served cold/iced.";
+            }
+
+            // 'Latte with no espresso shots' is just plain milk (implied rule - too hard to parse fully, simplified)
+            // A Latte must have at least one shot.
+            if (item.name === 'latte' && item.mods.shots < 1) {
+                return "A Latte requires at least one espresso shot. Did you want a steamer?";
+            }
+            
+            // Sensible maximum shots (e.g., 5)
+            if (item.mods.shots > 5) {
+                 return "That's a lot of shots! For safety, we cap espresso at 5 shots per drink. I've added 5 for you.";
+            }
+            // *Self-Correction for the demo* - set the shots to the sensible max
+            if (item.mods.shots > 5) {
+                item.mods.shots = 5;
+            }
+
+            // Other checks would go here (e.g., Cold Brew temp, max items, etc.)
+
+            return null; // Request is valid
+        }
+
+        // --- DOM Elements ---
+        const chatInterface = document.getElementById('chat-interface');
+        const textInput = document.getElementById('text-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceToggle = document.getElementById('voice-toggle');
+        const voiceStatus = document.getElementById('voice-status');
+        const orderQueue = document.getElementById('order-queue');
+        const noOrdersMessage = document.getElementById('no-orders');
+
+        // --- 1. Customer View Functions ---
+
+        // Renders a new message in the chat interface
+        function renderMessage(text, type, data = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message');
+            msgDiv.classList.add(`${type}-message`);
+            msgDiv.innerHTML = text;
+
+            if (type === 'receipt' && data) {
+                msgDiv.innerHTML += renderReceipt(data);
+            }
+
+            chatInterface.appendChild(msgDiv);
+            chatInterface.scrollTop = chatInterface.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // Generates the HTML for the order receipt
+        function renderReceipt(order) {
+            let total = 0;
+            let receiptHTML = `<div class="receipt">
+                <p style="text-align: center; font-weight: bold;">Order Receipt #${order.id}</p>
+                <hr style="border-style: dotted;">`;
+            
+            order.items.forEach(item => {
+                const itemTotal = parseFloat(item.price);
+                total += itemTotal;
+                receiptHTML += `<p><strong>${item.name.toUpperCase()}</strong> - $${itemTotal.toFixed(2)}</p>
+                    <ul style="list-style: none; margin: 0; padding: 0 0 5px 10px; font-size: 0.85rem;">
+                        <li>- Size: ${item.mods.size}</li>
+                        <li>- Temp: ${item.mods.temp}</li>
+                        <li>- Milk: ${item.mods.milk}</li>
+                        ${item.mods.shots > 1 ? `<li>- Shots: ${item.mods.shots}</li>` : ''}
+                        ${item.mods.ice !== MODIFIERS.ice.default ? `<li>- Ice: ${item.mods.ice}</li>` : ''}
+                    </ul>`;
+            });
+
+            receiptHTML += `<hr style="border-style: dotted;">
+                <p style="font-weight: bold; font-size: 1.1rem; text-align: right;">TOTAL: $${total.toFixed(2)}</p>
+                <p style="text-align: center; margin-top: 10px;">Thank you! Your order is being prepared.</p>
+            </div>`;
+            return receiptHTML;
+        }
+
+        // Simulates placing the order into the 'database'
+        function placeOrder(order) {
+            const finalOrder = { 
+                ...order, 
+                timestamp: new Date().toISOString(),
+                total: order.items.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2)
+            };
+            orders.unshift(finalOrder); // Add to the front
+            saveOrders();
+            renderBaristaView();
+            renderOwnerView();
+        }
+
+        // Event listener for Send button
+        sendBtn.addEventListener('click', () => {
+            const message = textInput.value.trim();
+            if (message === '') return;
+            
+            renderMessage(message, 'user');
+            textInput.value = '';
+
+            // Simulate AI delay and response
+            setTimeout(() => {
+                const response = processUserMessage(message);
+                if (response.type === 'receipt') {
+                    // Find the order that was just placed (it's the first one now)
+                    const placedOrder = orders[0];
+                    renderMessage(response.text, 'ai', placedOrder);
+                } else {
+                    renderMessage(response.text, 'ai');
+                }
+            }, 500);
+        });
+
+        // Event listener for Voice Toggle (Simulated)
+        let isVoiceActive = false;
+        voiceToggle.addEventListener('click', () => {
+            isVoiceActive = !isVoiceActive;
+            voiceToggle.classList.toggle('voice-active', isVoiceActive);
+            voiceToggle.textContent = isVoiceActive ? '🔴 Listening... (Simulated)' : '🎤 Voice Mode (Simulated)';
+            voiceStatus.classList.toggle('hidden', !isVoiceActive);
+            voiceStatus.textContent = isVoiceActive 
+                ? 'VOICE MODE: In a real implementation, this would connect to ElevenLabs/Bland AI.' 
+                : '';
+            
+            textInput.disabled = isVoiceActive;
+            sendBtn.disabled = isVoiceActive;
+
+            if (isVoiceActive) {
+                // Simulate receiving an order after a few seconds
+                 setTimeout(() => {
+                    if (isVoiceActive) {
+                        const simulatedOrder = 'I want a large iced latte with oat milk, and one small hot cappuccino with whole milk, then checkout.';
+                        renderMessage('Simulated Voice Input: ' + simulatedOrder, 'user');
+                        const response = processUserMessage(simulatedOrder);
+                        
+                        setTimeout(() => {
+                            if (response.type === 'receipt') {
+                                const placedOrder = orders[0];
+                                renderMessage(response.text, 'ai', placedOrder);
+                            } else {
+                                renderMessage(response.text, 'ai');
+                            }
+
+                            // Turn off voice mode after simulated order
+                            isVoiceActive = false;
+                            voiceToggle.classList.remove('voice-active');
+                            voiceToggle.textContent = '🎤 Voice Mode (Simulated)';
+                            voiceStatus.classList.add('hidden');
+                            textInput.disabled = false;
+                            sendBtn.disabled = false;
+                        }, 1000);
+                    }
+                }, 3000);
+            }
+        });
+
+
+        // --- 2. Barista View Functions ---
+        
+        // Updates the status of an order
+        function updateOrderStatus(id, newStatus) {
+            const orderIndex = orders.findIndex(o => o.id === id);
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = newStatus;
+                saveOrders();
+                renderBaristaView();
+                // No need to re-render Owner View unless 'Completed' affects a metric (like Prep Time AOV)
+            }
+        }
+
+        // Renders the Barista Order Queue
+        function renderBaristaView() {
+            orderQueue.innerHTML = ''; // Clear current view
+            const activeOrders = orders.filter(o => o.status !== 'Completed');
+
+            if (activeOrders.length === 0) {
+                noOrdersMessage.classList.remove('hidden');
+                orderQueue.appendChild(noOrdersMessage);
+                return;
+            } else {
+                noOrdersMessage.classList.add('hidden');
+            }
+
+            activeOrders.forEach(order => {
+                const ticketDiv = document.createElement('div');
+                ticketDiv.classList.add('order-ticket');
+                
+                const statusClass = order.status === 'In Progress' ? 'status-in-progress' : 'status-pending';
+
+                let detailsHTML = `<ul class="ticket-details">`;
+                order.items.forEach(item => {
+                    detailsHTML += `<li>${item.mods.size.toUpperCase()} ${item.mods.temp.toUpperCase()} <strong>${item.name.toUpperCase()}</strong> (${item.mods.milk}, ${item.mods.shots} shots)</li>`;
+                });
+                detailsHTML += `</ul>`;
+
+                let actionsHTML = '';
+                if (order.status === 'Pending') {
+                    actionsHTML = `<button onclick="updateOrderStatus('${order.id}', 'In Progress')">Start</button>`;
+                } else if (order.status === 'In Progress') {
+                    actionsHTML = `<button onclick="updateOrderStatus('${order.id}', 'Completed')">Complete</button>`;
+                }
+
+
+                ticketDiv.innerHTML = `
+                    <div class="ticket-header">
+                        <span>Ticket: **${order.id}**</span>
+                        <span class="status-tag ${statusClass}">${order.status.toUpperCase()}</span>
+                    </div>
+                    ${detailsHTML}
+                    <div class="ticket-actions">${actionsHTML}</div>
+                `;
+
+                orderQueue.appendChild(ticketDiv);
+            });
+        }
+
+
+        // --- 3. Owner View Functions ---
+
+        // Renders the Owner Data Dashboard
+        function renderOwnerView() {
+            const allItems = orders.flatMap(order => order.items.map(item => ({
+                name: item.name,
+                price: parseFloat(item.price)
+            })));
+
+            const totalOrders = orders.length;
+            const totalRevenue = allItems.reduce((sum, item) => sum + item.price, 0);
+            const aov = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+            
+            // Item sales count for Top Seller
+            const itemCounts = allItems.reduce((counts, item) => {
+                counts[item.name] = (counts[item.name] || 0) + 1;
+                return counts;
+            }, {});
+
+            const sortedItems = Object.entries(itemCounts)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .map(([name, count]) => ({ name, count }));
+
+            const topItem = sortedItems.length > 0 ? sortedItems[0].name.toUpperCase() : 'N/A';
+
+            // Update DOM
+            document.getElementById('metric-total-orders').textContent = totalOrders;
+            document.getElementById('metric-aov').textContent = `$${aov.toFixed(2)}`;
+            document.getElementById('metric-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById('metric-top-item').textContent = topItem;
+
+            const topSellingList = document.getElementById('top-selling-list');
+            topSellingList.innerHTML = '';
+            sortedItems.slice(0, 3).forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name.toUpperCase()} (${item.count} sold)`;
+                topSellingList.appendChild(li);
+            });
+        }
+
+        // --- Persistence (Local Storage as lightweight DB) ---
+        function saveOrders() {
+            localStorage.setItem('vibeCoffeeOrders', JSON.stringify(orders));
+        }
+
+        // --- Tab Logic ---
+        function handleTabSwitch(viewName) {
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(`${viewName}-view`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tab-button[data-view="${viewName}"]`).classList.add('active');
+
+            // Refresh views when switching to ensure data is up-to-date
+            if (viewName === 'barista') {
+                renderBaristaView();
+            } else if (viewName === 'owner') {
+                renderOwnerView();
+            }
+        }
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                handleTabSwitch(e.target.dataset.view);
+            });
+        });
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBaristaView(); // Initial render of all data
+            renderOwnerView();
+        });
+        
+    </script>
+</body>
+</html>
