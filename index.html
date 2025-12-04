@@ -603,6 +603,7 @@
                 orders[orderIndex].status = newStatus;
                 saveOrders();
                 renderBaristaView();
+                // No need to re-render Owner View unless 'Completed' affects a metric (like Prep Time AOV)
             }
         }
 
